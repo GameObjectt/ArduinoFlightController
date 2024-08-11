@@ -40,7 +40,7 @@ int64_t lastMicros = 0;
 int16_t lastRoll, lastPitch, lastYaw;
 
 float pGX, pGY, pGZ;
-
+double gPGX, gPGY;
 float iGX, iGY, iGZ;
 
 double channels[7];
@@ -50,6 +50,8 @@ bool showAccX, showAccY, showAccZ, showGyroX, showGyroY, showGyroZ, showP, showI
 bool kill = false;
 
 int watchdogMillis = 0;
+
+double motor1PWM, motor2PWM, motor3PWM, motor4PWM;
 void loop() {
   
   // Get RC channels values
@@ -82,8 +84,8 @@ void loop() {
     pGZ += GyZ * deltaTime + yaw * deltaTime;
 
     // subtract the RC values to get a higher/lower desired angle
-    double gPGX = -angleX - pitch / p_x;
-    double gPGY = angleY - roll / p_y;
+    gPGX = -angleX - pitch / p_x;
+    gPGY = angleY - roll / p_y;
 
     iGX += gPGX * deltaTime; // integral
     iGY += gPGY * deltaTime;
@@ -94,19 +96,19 @@ void loop() {
     double dGY = GyY + roll - lastRoll;
     double dGZ = GyZ + yaw - lastYaw;
 
-    double motor1PWM = throttle + -dGY * d_y - dGX*d_x + dGZ*d_z
+    motor1PWM = throttle + -dGY * d_y - dGX*d_x + dGZ*d_z
       - p_y * gPGY - p_x * gPGX - p_z * pGZ
       - i_y * iGY - i_x * iGX - i_z * iGZ;
 
-    double motor2PWM = throttle + -dGY*d_y + dGX*d_x - dGZ*d_z
+    motor2PWM = throttle + -dGY*d_y + dGX*d_x - dGZ*d_z
       - p_y * gPGY + p_x * gPGX + p_z * pGZ
       - i_y * iGY + i_x * iGX + i_z * iGZ;
 
-    double motor3PWM = throttle + dGY*d_y - dGX*d_x + dGZ*d_z
+    motor3PWM = throttle + dGY*d_y - dGX*d_x + dGZ*d_z
     + p_y * gPGY - p_x * gPGX + p_z * pGZ
     + i_y * iGY - i_x * iGX + i_z * iGZ;
 
-    double motor4PWM = throttle + dGY*d_y + dGX*d_x - dGZ*d_z // D
+    motor4PWM = throttle + dGY*d_y + dGX*d_x - dGZ*d_z // D
     + p_y * gPGY + p_x * gPGX - p_z * pGZ // P
     + i_y * iGY + i_x * iGX - i_z * iGZ; // I
 
